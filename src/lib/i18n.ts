@@ -1,0 +1,318 @@
+import { createContext, useContext } from "react";
+import { DayId, Language, SessionType, ValidationSeverity, ValidationType } from "../types";
+
+export type { Language } from "../types";
+
+type Dict = Record<string, string>;
+
+const es: Dict = {
+  // App / general
+  "app.subtitle": "Organizador semanal",
+  "common.more": "mas",
+  "common.min": "min",
+  // Sidebar
+  "sidebar.pending": "Pendientes",
+  "sidebar.session": "Sesion",
+  "sidebar.noPending": "No hay sesiones pendientes.",
+  "section.teams": "Equipos",
+  "section.coaches": "Entrenadores",
+  "section.venues": "Pistas",
+  "team.noCategory": "Sin categoria",
+  "coach.freeAvailability": "Disponibilidad libre",
+  "coach.pending": "Entrenador pendiente",
+  "aria.newSession": "Nueva sesion",
+  "aria.add": "Anadir",
+  "aria.editTeam": "Editar equipo",
+  "aria.deleteTeam": "Eliminar equipo",
+  "aria.editCoach": "Editar entrenador",
+  "aria.deleteCoach": "Eliminar entrenador",
+  "aria.editVenue": "Editar pista",
+  "aria.deleteVenue": "Eliminar pista",
+  "aria.close": "Cerrar",
+  // TopBar
+  "topbar.title": "Horario semanal",
+  "topbar.conflicts": "conflictos",
+  "topbar.warnings": "avisos",
+  "topbar.noConflicts": "Sin conflictos",
+  "save.local": "Guardado local",
+  "save.now": "Guardado ahora",
+  "filter.allTeams": "Todos los equipos",
+  "filter.allCoaches": "Todos los entrenadores",
+  "filter.allVenues": "Todas las pistas",
+  "filter.allDays": "Todos los dias",
+  "filter.aria": "Filtros",
+  "btn.new": "Nueva",
+  "btn.undo": "Deshacer",
+  "btn.duplicateWeek": "Duplicar semana",
+  "btn.print": "Imprimir / PDF",
+  "btn.export": "Exportar JSON",
+  "btn.import": "Importar JSON",
+  "btn.sample": "Datos de prueba",
+  "btn.undoTitle": "Deshacer el ultimo cambio",
+  "btn.printTitle": "Imprimir o guardar como PDF la vista actual (respeta los filtros)",
+  "lang.toggleTitle": "Cambiar idioma (euskara / castellano)",
+  // Grid
+  "grid.hour": "Hora",
+  "grid.emptyTitle": "No hay pistas o dias visibles",
+  "grid.emptyBody": "Ajusta los filtros o activa alguna pista para volver al horario.",
+  // Session modal
+  "modal.editSession": "Editar sesion",
+  "modal.newSession": "Nueva sesion",
+  "field.team": "Equipo",
+  "field.coach": "Entrenador",
+  "field.venue": "Pista",
+  "field.day": "Dia",
+  "field.start": "Inicio",
+  "field.end": "Fin",
+  "field.durationPending": "Duracion si queda pendiente",
+  "field.type": "Tipo",
+  "field.customColor": "Color personalizado",
+  "field.notes": "Notas",
+  "field.name": "Nombre",
+  "field.category": "Categoria",
+  "field.color": "Color",
+  "field.availability": "Disponibilidad",
+  "field.capacity": "Capacidad",
+  "field.active": "Activo",
+  "opt.noTeam": "Sin equipo",
+  "opt.pending": "Pendiente",
+  "btn.save": "Guardar",
+  "btn.cancel": "Cancelar",
+  "btn.delete": "Eliminar",
+  // Resource modal
+  "resource.editTeam": "Editar equipo",
+  "resource.newTeam": "Nuevo equipo",
+  "resource.editCoach": "Editar entrenador",
+  "resource.newCoach": "Nuevo entrenador",
+  "resource.editVenue": "Editar pista",
+  "resource.newVenue": "Nueva pista",
+  // Print view
+  "print.title": "Iraurgi Ordu",
+  "print.subtitle": "Horario semanal de entrenamientos",
+  "print.generatedOn": "Generado el",
+  "print.fullSchedule": "Horario completo",
+  "print.unassigned": "Sin asignar",
+  "print.empty": "No hay sesiones que coincidan con los filtros actuales.",
+  "print.colTime": "Hora",
+  "print.colTeam": "Equipo",
+  "print.colCoach": "Entrenador",
+  "print.colVenue": "Pista",
+  "print.colType": "Tipo",
+  "print.colNotes": "Notas",
+  // Toasts
+  "toast.sessionSaved": "Sesion guardada",
+  "toast.sessionDeleted": "Sesion eliminada",
+  "toast.resourceSaved": "Recurso guardado",
+  "toast.venueDisabled": "Pista desactivada; sus sesiones pasan a pendientes",
+  "toast.resourceDisabled": "Recurso desactivado",
+  "toast.sessionPlaced": "Sesion colocada; validacion actualizada",
+  "toast.imported": "Planificacion importada",
+  "toast.importError": "No se ha podido importar el JSON",
+  "toast.sampleRestored": "Datos de prueba restaurados",
+  "toast.weekDuplicated": "Semana duplicada como sesiones pendientes",
+  "toast.undone": "Cambio deshecho",
+  // Confirms
+  "confirm.import": "Importar reemplazara la planificacion actual. Podras deshacerlo. ¿Continuar?",
+  "confirm.reset": "Esto reemplazara TODA la planificacion actual por los datos de prueba. ¿Seguro?",
+};
+
+const eu: Dict = {
+  "app.subtitle": "Asteko antolatzailea",
+  "common.more": "gehiago",
+  "common.min": "min",
+  "sidebar.pending": "Zain",
+  "sidebar.session": "Saioa",
+  "sidebar.noPending": "Ez dago saio zainik.",
+  "section.teams": "Taldeak",
+  "section.coaches": "Entrenatzaileak",
+  "section.venues": "Pistak",
+  "team.noCategory": "Kategoriarik gabe",
+  "coach.freeAvailability": "Eskuragarritasun librea",
+  "coach.pending": "Entrenatzailea zain",
+  "aria.newSession": "Saio berria",
+  "aria.add": "Gehitu",
+  "aria.editTeam": "Taldea editatu",
+  "aria.deleteTeam": "Taldea ezabatu",
+  "aria.editCoach": "Entrenatzailea editatu",
+  "aria.deleteCoach": "Entrenatzailea ezabatu",
+  "aria.editVenue": "Pista editatu",
+  "aria.deleteVenue": "Pista ezabatu",
+  "aria.close": "Itxi",
+  "topbar.title": "Asteko ordutegia",
+  "topbar.conflicts": "gatazka",
+  "topbar.warnings": "abisu",
+  "topbar.noConflicts": "Gatazkarik ez",
+  "save.local": "Lokalean gordeta",
+  "save.now": "Orain gordeta",
+  "filter.allTeams": "Talde guztiak",
+  "filter.allCoaches": "Entrenatzaile guztiak",
+  "filter.allVenues": "Pista guztiak",
+  "filter.allDays": "Egun guztiak",
+  "filter.aria": "Iragazkiak",
+  "btn.new": "Berria",
+  "btn.undo": "Desegin",
+  "btn.duplicateWeek": "Astea bikoiztu",
+  "btn.print": "Inprimatu / PDF",
+  "btn.export": "JSON esportatu",
+  "btn.import": "JSON inportatu",
+  "btn.sample": "Proba-datuak",
+  "btn.undoTitle": "Azken aldaketa desegin",
+  "btn.printTitle": "Uneko ikuspegia inprimatu edo PDF gisa gorde (iragazkiak errespetatzen ditu)",
+  "lang.toggleTitle": "Hizkuntza aldatu (euskara / gaztelania)",
+  "grid.hour": "Ordua",
+  "grid.emptyTitle": "Ez dago pista edo egun ikusgairik",
+  "grid.emptyBody": "Egokitu iragazkiak edo aktibatu pistaren bat ordutegira itzultzeko.",
+  "modal.editSession": "Saioa editatu",
+  "modal.newSession": "Saio berria",
+  "field.team": "Taldea",
+  "field.coach": "Entrenatzailea",
+  "field.venue": "Pista",
+  "field.day": "Eguna",
+  "field.start": "Hasiera",
+  "field.end": "Amaiera",
+  "field.durationPending": "Iraupena zain geratzen bada",
+  "field.type": "Mota",
+  "field.customColor": "Kolore pertsonalizatua",
+  "field.notes": "Oharrak",
+  "field.name": "Izena",
+  "field.category": "Kategoria",
+  "field.color": "Kolorea",
+  "field.availability": "Eskuragarritasuna",
+  "field.capacity": "Edukiera",
+  "field.active": "Aktibo",
+  "opt.noTeam": "Talderik gabe",
+  "opt.pending": "Zain",
+  "btn.save": "Gorde",
+  "btn.cancel": "Utzi",
+  "btn.delete": "Ezabatu",
+  "resource.editTeam": "Taldea editatu",
+  "resource.newTeam": "Talde berria",
+  "resource.editCoach": "Entrenatzailea editatu",
+  "resource.newCoach": "Entrenatzaile berria",
+  "resource.editVenue": "Pista editatu",
+  "resource.newVenue": "Pista berria",
+  "print.title": "Iraurgi Ordu",
+  "print.subtitle": "Entrenamenduen asteko ordutegia",
+  "print.generatedOn": "Sortua",
+  "print.fullSchedule": "Ordutegi osoa",
+  "print.unassigned": "Esleitu gabe",
+  "print.empty": "Ez dago uneko iragazkiekin bat datorren saiorik.",
+  "print.colTime": "Ordua",
+  "print.colTeam": "Taldea",
+  "print.colCoach": "Entrenatzailea",
+  "print.colVenue": "Pista",
+  "print.colType": "Mota",
+  "print.colNotes": "Oharrak",
+  "toast.sessionSaved": "Saioa gordeta",
+  "toast.sessionDeleted": "Saioa ezabatuta",
+  "toast.resourceSaved": "Baliabidea gordeta",
+  "toast.venueDisabled": "Pista desaktibatuta; bere saioak zain geratzen dira",
+  "toast.resourceDisabled": "Baliabidea desaktibatuta",
+  "toast.sessionPlaced": "Saioa kokatuta; balidazioa eguneratuta",
+  "toast.imported": "Plangintza inportatuta",
+  "toast.importError": "Ezin izan da JSONa inportatu",
+  "toast.sampleRestored": "Proba-datuak berrezarrita",
+  "toast.weekDuplicated": "Astea bikoiztuta zain dauden saio gisa",
+  "toast.undone": "Aldaketa deseginda",
+  "confirm.import": "Inportatzeak uneko plangintza ordeztuko du. Desegin ahal izango duzu. Jarraitu?",
+  "confirm.reset": "Honek uneko plangintza OSOA proba-datuekin ordeztuko du. Ziur?",
+};
+
+const dictionaries: Record<Language, Dict> = { es, eu };
+
+export function translate(lang: Language, key: string): string {
+  return dictionaries[lang][key] ?? dictionaries.es[key] ?? key;
+}
+
+const dayLabels: Record<Language, Record<DayId, string>> = {
+  es: {
+    monday: "Lunes",
+    tuesday: "Martes",
+    wednesday: "Miercoles",
+    thursday: "Jueves",
+    friday: "Viernes",
+    saturday: "Sabado",
+    sunday: "Domingo",
+  },
+  eu: {
+    monday: "Astelehena",
+    tuesday: "Asteartea",
+    wednesday: "Asteazkena",
+    thursday: "Osteguna",
+    friday: "Ostirala",
+    saturday: "Larunbata",
+    sunday: "Igandea",
+  },
+};
+
+export function dayLabel(lang: Language, id: DayId): string {
+  return dayLabels[lang][id];
+}
+
+const sessionTypeLabels: Record<Language, Record<SessionType, string>> = {
+  es: {
+    entrenamiento: "entrenamiento",
+    partido: "partido",
+    fisico: "fisico",
+    tecnificacion: "tecnificacion",
+    reunion: "reunion",
+    otro: "otro",
+  },
+  eu: {
+    entrenamiento: "entrenamendua",
+    partido: "partida",
+    fisico: "fisikoa",
+    tecnificacion: "teknifikazioa",
+    reunion: "bilera",
+    otro: "bestelakoa",
+  },
+};
+
+export function sessionTypeLabel(lang: Language, type: SessionType): string {
+  return sessionTypeLabels[lang][type];
+}
+
+const issueMessages: Record<Language, Record<string, string>> = {
+  es: {
+    "missing-team": "Sesion sin equipo",
+    "missing-coach": "Entrenador pendiente",
+    "missing-venue.warning": "Sesion pendiente sin pista",
+    "missing-venue.error": "Sesion sin pista",
+    "missing-time.warning": "Sesion pendiente sin hora",
+    "missing-time.error": "Sesion sin dia, inicio o fin",
+    "invalid-time": "Hora fin anterior o igual a la hora inicio",
+    "outside-visible-hours": "Sesion fuera del horario visible",
+    "venue-overlap": "Conflicto de pista",
+    "coach-overlap": "Conflicto de entrenador",
+    "team-overlap": "Conflicto de equipo",
+  },
+  eu: {
+    "missing-team": "Saioa talderik gabe",
+    "missing-coach": "Entrenatzailea zain",
+    "missing-venue.warning": "Zain dagoen saioa pistarik gabe",
+    "missing-venue.error": "Saioa pistarik gabe",
+    "missing-time.warning": "Zain dagoen saioa ordurik gabe",
+    "missing-time.error": "Saioa egunik, hasierarik edo amaierarik gabe",
+    "invalid-time": "Amaiera-ordua hasierakoaren berdina edo lehenagokoa",
+    "outside-visible-hours": "Saioa ikusgai dagoen ordutegitik kanpo",
+    "venue-overlap": "Pista-gatazka",
+    "coach-overlap": "Entrenatzaile-gatazka",
+    "team-overlap": "Talde-gatazka",
+  },
+};
+
+export function issueMessage(lang: Language, type: ValidationType, severity: ValidationSeverity): string {
+  const dict = issueMessages[lang] ?? issueMessages.es;
+  return dict[`${type}.${severity}`] ?? dict[type] ?? type;
+}
+
+export const LanguageContext = createContext<Language>("es");
+
+export function useLanguage(): Language {
+  return useContext(LanguageContext);
+}
+
+export function useT(): (key: string) => string {
+  const lang = useLanguage();
+  return (key: string) => translate(lang, key);
+}
