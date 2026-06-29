@@ -5,6 +5,7 @@ import {
   Languages,
   Printer,
   RotateCcw,
+  Sparkles,
   Undo2,
   Upload,
   AlertTriangle,
@@ -26,6 +27,7 @@ interface TopBarProps {
   onToggleLanguage: () => void;
   onFiltersChange: (filters: Filters) => void;
   onNewSession: () => void;
+  onGenerate: () => void;
   onPrint: () => void;
   onExport: () => void;
   onImport: (file: File) => void;
@@ -44,6 +46,7 @@ export function TopBar({
   onToggleLanguage,
   onFiltersChange,
   onNewSession,
+  onGenerate,
   onPrint,
   onExport,
   onImport,
@@ -124,6 +127,10 @@ export function TopBar({
         <button type="button" className="toolbar-button toolbar-button--primary" onClick={onNewSession}>
           <Plus size={15} />
           {t("btn.new")}
+        </button>
+        <button type="button" className="toolbar-button toolbar-button--accent" onClick={onGenerate} title={t("btn.generateTitle")}>
+          <Sparkles size={15} />
+          {t("btn.generate")}
         </button>
         <button type="button" className="toolbar-button" onClick={onUndo} disabled={!canUndo} title={t("btn.undoTitle")}>
           <Undo2 size={15} />

@@ -130,6 +130,14 @@ const es: Dict = {
   "needs.noPreference": "Sin preferencia",
   "needs.forbiddenDays": "Dias en los que NO puede entrenar",
   "field.locked": "Fijar esta sesion (el generador no la movera)",
+  // Generador
+  "btn.generate": "Generar",
+  "btn.generateTitle": "Genera las sesiones que faltan respetando pistas, disponibilidad y dias; no toca las fijas",
+  "gen.created": "sesiones colocadas",
+  "gen.unplaced": "sin colocar",
+  "gen.nothing": "Nada que generar: los equipos ya tienen sus sesiones (define necesidades en cada equipo).",
+  "gen.unplacedTitle": "Sin hueco para:",
+  "gen.dismiss": "Descartar",
 };
 
 const eu: Dict = {
@@ -246,6 +254,13 @@ const eu: Dict = {
   "needs.noPreference": "Lehentasunik gabe",
   "needs.forbiddenDays": "Zein egunetan EZIN duen entrenatu",
   "field.locked": "Saio hau finkatu (sortzaileak ez du mugituko)",
+  "btn.generate": "Sortu",
+  "btn.generateTitle": "Falta diren saioak sortzen ditu pistak, eskuragarritasuna eta egunak errespetatuz; finkatuak ez ditu ukitzen",
+  "gen.created": "saio kokatuta",
+  "gen.unplaced": "kokatu gabe",
+  "gen.nothing": "Ez dago ezer sortzeko: taldeek dagoeneko badituzte beren saioak (zehaztu beharrak talde bakoitzean).",
+  "gen.unplacedTitle": "Lekurik gabe:",
+  "gen.dismiss": "Baztertu",
 };
 
 const dictionaries: Record<Language, Dict> = { es, eu };

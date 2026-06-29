@@ -17,6 +17,7 @@ import { createSampleData } from "./data/sampleData";
 import { matchesFilters } from "./lib/filtering";
 import { makeId } from "./lib/ids";
 import { loadStoredData, normalizeImportedData, saveStoredData } from "./lib/storage";
+import { generateSchedule, GenerationResult } from "./lib/generator";
 import { addMinutes, durationMinutes } from "./lib/time";
 import { applyDerivedSessionStatuses, summarizeReport, validateSessions } from "./lib/validation";
 import { issueMessage, LanguageContext, translate } from "./lib/i18n";
@@ -27,7 +28,7 @@ type ResourceModalState = {
   id?: string;
 } | null;
 
-type ToastState = { key: string; undo?: boolean } | null;
+type ToastState = { key?: string; text?: string; undo?: boolean } | null;
 
 type HistoryState = { past: AppData[]; present: AppData };
 
@@ -62,6 +63,7 @@ export function App() {
   const [resourceModal, setResourceModal] = useState<ResourceModalState>(null);
   const [saveLabel, setSaveLabel] = useState("save.local");
   const [toast, setToast] = useState<ToastState>(null);
+  const [generation, setGeneration] = useState<GenerationResult | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -312,6 +314,23 @@ export function App() {
     setToast({ key: "toast.weekDuplicated", undo: true });
   };
 
+  const handleGenerate = () => {
+    const result = generateSchedule(data);
+    if (result.created === 0 && result.unplaced.length === 0) {
+      setGeneration(null);
+      setToast({ key: "gen.nothing" });
+      return;
+    }
+    if (result.created > 0) {
+      updateData((current) => ({ ...current, sessions: [...current.sessions, ...result.sessions] }));
+    }
+    setGeneration(result.unplaced.length > 0 ? result : null);
+    const remaining = result.unplaced.reduce((sum, item) => sum + item.remaining, 0);
+    const parts = [`${result.created} ${t("gen.created")}`];
+    if (remaining > 0) parts.push(`${remaining} ${t("gen.unplaced")}`);
+    setToast({ text: parts.join(" · "), undo: result.created > 0 });
+  };
+
   const editingSession = editingSessionId ? data.sessions.find((session) => session.id === editingSessionId) : undefined;
   const editingResource = resolveResource(data, resourceModal);
 
@@ -340,12 +359,27 @@ export function App() {
             onToggleLanguage={handleToggleLanguage}
             onFiltersChange={setFilters}
             onNewSession={() => setCreatingSession(true)}
+            onGenerate={handleGenerate}
             onPrint={handlePrint}
             onExport={handleExport}
             onImport={handleImport}
             onReset={handleReset}
             onDuplicateWeek={handleDuplicateWeek}
           />
+
+          {generation && generation.unplaced.length > 0 && (
+            <div className="issue-strip gen-strip" aria-live="polite">
+              <strong>{t("gen.unplacedTitle")}</strong>
+              {generation.unplaced.map((item) => (
+                <span key={item.teamId} className="issue-chip issue-chip--warning">
+                  {data.teams.find((team) => team.id === item.teamId)?.name ?? item.teamId}: {item.remaining}
+                </span>
+              ))}
+              <button type="button" className="small-button" onClick={() => setGeneration(null)}>
+                {t("gen.dismiss")}
+              </button>
+            </div>
+          )}
 
           {report.issues.length > 0 && (
             <div className="issue-strip" aria-live="polite">
@@ -398,7 +432,7 @@ export function App() {
 
         {toast && (
           <div className="toast" role="status">
-            <span>{t(toast.key)}</span>
+            <span>{toast.text ?? (toast.key ? t(toast.key) : "")}</span>
             {toast.undo && canUndo && (
               <button type="button" className="toast__action" onClick={handleUndo}>
                 {t("btn.undo")}

@@ -39,6 +39,7 @@ Organizador web de horarios para equipos, entrenadores y pistas. Es un MVP funci
 - Horario-marco por pista (cuando esta abierta cada dia) y disponibilidad por entrenador: colocar fuera marca error (pista cerrada) o aviso (entrenador no disponible); las horas cerradas de cada pista se sombrean en la rejilla.
 - Necesidades por equipo (sesiones por semana, duracion, pista preferida y dias en los que no puede entrenar) como base del futuro generador; aviso si colocas un equipo en un dia que tiene prohibido.
 - Sesiones fijas: marca una sesion con candado para que el generador no la mueva.
+- Generador de horario ("Generar"): coloca automaticamente las sesiones que faltan de cada equipo respetando reglas duras (pista abierta, sin choques, dias permitidos) y preferencias (pista preferida, repartir entre dias); no toca las sesiones fijas, es idempotente (volver a generar no duplica) y avisa de lo que no cabe. Modelo "genera y tu retocas".
 
 ## Modelo de datos
 

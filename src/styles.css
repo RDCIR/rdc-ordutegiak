@@ -240,6 +240,22 @@ textarea {
   background: var(--teal-strong);
 }
 
+.toolbar-button--accent {
+  border-color: #7c3aed;
+  background: #7c3aed;
+  color: #ffffff;
+}
+
+.toolbar-button--accent:hover {
+  background: #6d28d9;
+}
+
+.gen-strip strong {
+  font-size: 12px;
+  color: var(--muted-strong);
+  align-self: center;
+}
+
 .danger-button {
   border-color: #f2b8b3;
   color: var(--red);
