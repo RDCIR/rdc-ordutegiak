@@ -1,8 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { Coach, Team, Venue } from "../types";
+import { Coach, DAYS, DayId, Team, TeamNeeds, Venue } from "../types";
 import { makeId } from "../lib/ids";
-import { useT } from "../lib/i18n";
+import { dayShort, useLanguage, useT } from "../lib/i18n";
 import { AvailabilityEditor } from "./AvailabilityEditor";
 
 export type ResourceKind = "team" | "coach" | "venue";
@@ -11,9 +11,17 @@ type ResourceValue = Team | Coach | Venue;
 interface ResourceEditorModalProps {
   kind: ResourceKind;
   resource?: ResourceValue;
+  venues: Venue[];
   onSave: (kind: ResourceKind, resource: ResourceValue) => void;
   onClose: () => void;
 }
+
+const defaultNeeds: TeamNeeds = {
+  sessionsPerWeek: 2,
+  sessionDurationMinutes: 90,
+  forbiddenDays: [],
+  preferredVenueId: null,
+};
 
 function createEmptyResource(kind: ResourceKind): ResourceValue {
   if (kind === "team") {
@@ -52,8 +60,9 @@ function titleKey(kind: ResourceKind, editing: boolean): string {
   return `resource.${action}${noun}`;
 }
 
-export function ResourceEditorModal({ kind, resource, onSave, onClose }: ResourceEditorModalProps) {
+export function ResourceEditorModal({ kind, resource, venues, onSave, onClose }: ResourceEditorModalProps) {
   const t = useT();
+  const lang = useLanguage();
   const [draft, setDraft] = useState<ResourceValue>(() => resource ?? createEmptyResource(kind));
 
   useEffect(() => {
@@ -72,6 +81,17 @@ export function ResourceEditorModal({ kind, resource, onSave, onClose }: Resourc
   const isTeam = kind === "team";
   const isCoach = kind === "coach";
   const isVenue = kind === "venue";
+
+  const teamNeeds = (draft as Team).needs;
+  const setNeeds = (needs: TeamNeeds | undefined) => patchDraft({ needs } as Partial<ResourceValue>);
+  const patchNeeds = (patch: Partial<TeamNeeds>) => setNeeds({ ...(teamNeeds ?? defaultNeeds), ...patch });
+  const toggleForbiddenDay = (day: DayId) => {
+    const current = teamNeeds ?? defaultNeeds;
+    const forbiddenDays = current.forbiddenDays.includes(day)
+      ? current.forbiddenDays.filter((entry) => entry !== day)
+      : [...current.forbiddenDays, day];
+    patchNeeds({ forbiddenDays });
+  };
 
   return (
     <div className="modal-backdrop" role="presentation">
@@ -99,6 +119,79 @@ export function ResourceEditorModal({ kind, resource, onSave, onClose }: Resourc
                 {t("field.color")}
                 <input type="color" value={(draft as Team).color} onChange={(event) => patchDraft({ color: event.target.value } as Partial<ResourceValue>)} />
               </label>
+
+              <div className="avail-editor">
+                <label className="check-row">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(teamNeeds)}
+                    onChange={(event) => setNeeds(event.target.checked ? { ...defaultNeeds } : undefined)}
+                  />
+                  {t("needs.enable")}
+                </label>
+
+                {!teamNeeds ? (
+                  <p className="avail-editor__hint">{t("needs.disabledHint")}</p>
+                ) : (
+                  <div className="needs-grid">
+                    <label>
+                      {t("needs.sessionsPerWeek")}
+                      <input
+                        type="number"
+                        min={0}
+                        max={14}
+                        value={teamNeeds.sessionsPerWeek}
+                        onChange={(event) => patchNeeds({ sessionsPerWeek: Number(event.target.value) })}
+                      />
+                    </label>
+                    <label>
+                      {t("needs.duration")}
+                      <input
+                        type="number"
+                        min={30}
+                        step={15}
+                        value={teamNeeds.sessionDurationMinutes}
+                        onChange={(event) => patchNeeds({ sessionDurationMinutes: Number(event.target.value) })}
+                      />
+                    </label>
+                    <label>
+                      {t("needs.preferredVenue")}
+                      <select
+                        value={teamNeeds.preferredVenueId ?? ""}
+                        onChange={(event) => patchNeeds({ preferredVenueId: event.target.value || null })}
+                      >
+                        <option value="">{t("needs.noPreference")}</option>
+                        {venues
+                          .filter((venue) => venue.active || venue.id === teamNeeds.preferredVenueId)
+                          .map((venue) => (
+                            <option key={venue.id} value={venue.id}>
+                              {venue.name}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                    <div className="needs-days">
+                      <span className="needs-days__label">{t("needs.forbiddenDays")}</span>
+                      <div className="needs-days__chips">
+                        {DAYS.map((day) => {
+                          const on = teamNeeds.forbiddenDays.includes(day.id);
+                          return (
+                            <button
+                              type="button"
+                              key={day.id}
+                              className={`day-chip${on ? " day-chip--on" : ""}`}
+                              aria-pressed={on}
+                              onClick={() => toggleForbiddenDay(day.id)}
+                            >
+                              {dayShort(lang, day.id)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </>
           )}
 

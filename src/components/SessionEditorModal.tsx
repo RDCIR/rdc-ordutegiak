@@ -190,6 +190,15 @@ export function SessionEditorModal({ data, session, onSave, onDelete, onClose }:
             <textarea value={draft.notes} onChange={(event) => updateDraft({ notes: event.target.value })} rows={3} />
           </label>
 
+          <label className="check-row form-grid__full">
+            <input
+              type="checkbox"
+              checked={Boolean(draft.locked)}
+              onChange={(event) => updateDraft({ locked: event.target.checked })}
+            />
+            {t("field.locked")}
+          </label>
+
           <div className="modal__actions form-grid__full">
             {session && (
               <button className="danger-button" type="button" onClick={() => onDelete(session.id)}>

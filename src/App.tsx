@@ -70,8 +70,8 @@ export function App() {
   );
 
   const report = useMemo(
-    () => validateSessions(data.sessions, data.config, data.venues, data.coaches),
-    [data.config, data.sessions, data.venues, data.coaches],
+    () => validateSessions(data.sessions, data.config, data.venues, data.coaches, data.teams),
+    [data.config, data.sessions, data.venues, data.coaches, data.teams],
   );
   const issueSummary = useMemo(() => summarizeReport(report), [report]);
   const filteredSessions = useMemo(
@@ -390,6 +390,7 @@ export function App() {
           <ResourceEditorModal
             kind={resourceModal.kind}
             resource={editingResource}
+            venues={data.venues}
             onSave={handleSaveResource}
             onClose={() => setResourceModal(null)}
           />

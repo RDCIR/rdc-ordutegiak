@@ -24,6 +24,7 @@ export function createSampleData(): AppData {
         color: "#2f80ed",
         notes: "Prioridad pista grande.",
         active: true,
+        needs: { sessionsPerWeek: 2, sessionDurationMinutes: 90, forbiddenDays: [], preferredVenueId: "venue-pista-1" },
       },
       {
         id: "team-infantil-b",
@@ -32,6 +33,7 @@ export function createSampleData(): AppData {
         color: "#20a37f",
         notes: "",
         active: true,
+        needs: { sessionsPerWeek: 2, sessionDurationMinutes: 90, forbiddenDays: [], preferredVenueId: "venue-pista-1" },
       },
       {
         id: "team-cadete-a",
@@ -40,6 +42,7 @@ export function createSampleData(): AppData {
         color: "#f2994a",
         notes: "",
         active: true,
+        needs: { sessionsPerWeek: 3, sessionDurationMinutes: 90, forbiddenDays: [], preferredVenueId: "venue-pista-2" },
       },
       {
         id: "team-juvenil",
@@ -48,6 +51,7 @@ export function createSampleData(): AppData {
         color: "#9b51e0",
         notes: "Puede entrenar tarde.",
         active: true,
+        needs: { sessionsPerWeek: 3, sessionDurationMinutes: 120, forbiddenDays: [], preferredVenueId: null },
       },
       {
         id: "team-senior",
@@ -56,6 +60,7 @@ export function createSampleData(): AppData {
         color: "#eb5757",
         notes: "",
         active: true,
+        needs: { sessionsPerWeek: 3, sessionDurationMinutes: 120, forbiddenDays: [], preferredVenueId: "venue-pista-1" },
       },
     ],
     coaches: [
@@ -156,6 +161,7 @@ export function createSampleData(): AppData {
         type: "entrenamiento",
         notes: "Tecnica y toma de decisiones.",
         status: "colocada",
+        locked: true,
       },
       {
         id: "session-2",

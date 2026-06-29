@@ -118,4 +118,18 @@ describe("validateSessions", () => {
     expect(issue?.severity).toBe("warning");
     expect(report.issues.some((entry) => entry.type === "venue-closed")).toBe(false);
   });
+
+  it("warns when a team is placed on one of its forbidden days", () => {
+    const data = createSampleData();
+    const teams = data.teams.map((team) =>
+      team.id === "team-infantil-a"
+        ? { ...team, needs: { ...team.needs!, forbiddenDays: ["monday" as const] } }
+        : team,
+    );
+    // sessions[0] es Infantil A el lunes; con el lunes prohibido debe avisar.
+    const report = validateSessions([data.sessions[0]], data.config, data.venues, data.coaches, teams);
+    const issue = report.issues.find((entry) => entry.type === "team-forbidden-day");
+
+    expect(issue?.severity).toBe("warning");
+  });
 });

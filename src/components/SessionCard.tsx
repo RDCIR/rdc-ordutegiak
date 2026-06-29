@@ -1,5 +1,5 @@
 import { useDraggable } from "@dnd-kit/core";
-import { AlertTriangle, Clock, GripVertical } from "lucide-react";
+import { AlertTriangle, Clock, GripVertical, Lock } from "lucide-react";
 import { CSSProperties, KeyboardEvent } from "react";
 import { Coach, Team, TrainingSession, ValidationIssue, Venue } from "../types";
 import { issueMessage, sessionTypeLabel, useLanguage, useT } from "../lib/i18n";
@@ -80,6 +80,11 @@ export function SessionCard({
           <GripVertical size={14} />
         </span>
         <strong>{team?.name ?? t("opt.noTeam")}</strong>
+        {session.locked && (
+          <span className="session-card__lock" title={t("field.locked")} aria-hidden="true">
+            <Lock size={12} />
+          </span>
+        )}
         {(hasError || hasWarning) && (
           <span
             className="session-card__alert"

@@ -684,6 +684,47 @@ textarea {
   font-size: 12px;
 }
 
+.needs-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.needs-days__label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted-strong);
+  margin-bottom: 6px;
+}
+
+.needs-days__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.day-chip {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted-strong);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.day-chip--on {
+  border-color: var(--red);
+  background: #fff1f0;
+  color: var(--red);
+}
+
+.session-card__lock {
+  display: inline-flex;
+  color: var(--muted);
+}
+
 .modal__actions {
   display: flex;
   align-items: center;

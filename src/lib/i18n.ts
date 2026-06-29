@@ -120,6 +120,16 @@ const es: Dict = {
   "avail.limitCoach": "Limitar la disponibilidad",
   "avail.noLimitCoach": "Sin limite: disponible a cualquier hora.",
   "avail.to": "a",
+  // Necesidades del equipo (generador) y sesiones fijas
+  "needs.title": "Necesidades para el generador",
+  "needs.enable": "Definir necesidades de este equipo",
+  "needs.disabledHint": "Sin definir: este equipo no entra en la generacion automatica.",
+  "needs.sessionsPerWeek": "Sesiones por semana",
+  "needs.duration": "Duracion de cada sesion (min)",
+  "needs.preferredVenue": "Pista preferida",
+  "needs.noPreference": "Sin preferencia",
+  "needs.forbiddenDays": "Dias en los que NO puede entrenar",
+  "field.locked": "Fijar esta sesion (el generador no la movera)",
 };
 
 const eu: Dict = {
@@ -227,6 +237,15 @@ const eu: Dict = {
   "avail.limitCoach": "Eskuragarritasuna mugatu",
   "avail.noLimitCoach": "Mugarik gabe: beti eskuragarri.",
   "avail.to": "-",
+  "needs.title": "Sortzailerako beharrak",
+  "needs.enable": "Talde honen beharrak zehaztu",
+  "needs.disabledHint": "Zehaztu gabe: talde hau ez da sartzen sorkuntza automatikoan.",
+  "needs.sessionsPerWeek": "Saioak asteko",
+  "needs.duration": "Saio bakoitzaren iraupena (min)",
+  "needs.preferredVenue": "Pista gogokoena",
+  "needs.noPreference": "Lehentasunik gabe",
+  "needs.forbiddenDays": "Zein egunetan EZIN duen entrenatu",
+  "field.locked": "Saio hau finkatu (sortzaileak ez du mugituko)",
 };
 
 const dictionaries: Record<Language, Dict> = { es, eu };
@@ -304,6 +323,7 @@ const issueMessages: Record<Language, Record<string, string>> = {
     "outside-visible-hours": "Sesion fuera del horario visible",
     "venue-closed": "Pista cerrada a esa hora",
     "coach-unavailable": "Entrenador fuera de su disponibilidad",
+    "team-forbidden-day": "El equipo no entrena ese dia",
     "venue-overlap": "Conflicto de pista",
     "coach-overlap": "Conflicto de entrenador",
     "team-overlap": "Conflicto de equipo",
@@ -319,6 +339,7 @@ const issueMessages: Record<Language, Record<string, string>> = {
     "outside-visible-hours": "Saioa ikusgai dagoen ordutegitik kanpo",
     "venue-closed": "Pista itxita ordu horretan",
     "coach-unavailable": "Entrenatzailea bere eskuragarritasunetik kanpo",
+    "team-forbidden-day": "Taldeak ez du egun horretan entrenatzen",
     "venue-overlap": "Pista-gatazka",
     "coach-overlap": "Entrenatzaile-gatazka",
     "team-overlap": "Talde-gatazka",

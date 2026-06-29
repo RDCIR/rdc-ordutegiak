@@ -37,10 +37,12 @@ Organizador web de horarios para equipos, entrenadores y pistas. Es un MVP funci
 - Imprimir o guardar como PDF la vista actual en formato agenda (respeta los filtros: completo, por equipo o por entrenador).
 - Interfaz bilingue euskara / castellano con interruptor; el idioma se guarda con la planificacion (por defecto euskara).
 - Horario-marco por pista (cuando esta abierta cada dia) y disponibilidad por entrenador: colocar fuera marca error (pista cerrada) o aviso (entrenador no disponible); las horas cerradas de cada pista se sombrean en la rejilla.
+- Necesidades por equipo (sesiones por semana, duracion, pista preferida y dias en los que no puede entrenar) como base del futuro generador; aviso si colocas un equipo en un dia que tiene prohibido.
+- Sesiones fijas: marca una sesion con candado para que el generador no la mueva.
 
 ## Modelo de datos
 
-- `Team`: id, nombre, categoria, color, notas, activo.
+- `Team`: id, nombre, categoria, color, notas, activo, necesidades (sesiones/semana, duracion, dias prohibidos, pista preferida).
 - `Coach`: id, nombre, disponibilidad (texto), franjas de disponibilidad por dia, color, notas, activo.
 - `Venue`: id, nombre, tipo, capacidad, horario-marco (franjas abiertas por dia), notas, activo.
 - `TrainingSession`: id, equipo, entrenador opcional, pista, dia, inicio, fin, tipo, notas, estado y color.

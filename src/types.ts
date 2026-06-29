@@ -33,6 +33,18 @@ export interface TimeRange {
 /** Franjas disponibles por dia de la semana. Un dia ausente = no disponible ese dia. */
 export type WeeklyAvailability = Partial<Record<DayId, TimeRange[]>>;
 
+/** Necesidades de un equipo para el generador de horarios. */
+export interface TeamNeeds {
+  /** Cuantas sesiones hay que colocar por semana. */
+  sessionsPerWeek: number;
+  /** Duracion de cada sesion en minutos. */
+  sessionDurationMinutes: number;
+  /** Dias en los que el equipo NO puede entrenar. */
+  forbiddenDays: DayId[];
+  /** Pista preferida (preferencia blanda); null = sin preferencia. */
+  preferredVenueId?: string | null;
+}
+
 export interface Team {
   id: string;
   name: string;
@@ -40,6 +52,8 @@ export interface Team {
   color: string;
   notes: string;
   active: boolean;
+  /** Necesidades para el generador. Sin definir = no entra en la generacion. */
+  needs?: TeamNeeds;
 }
 
 export interface Coach {
@@ -77,6 +91,8 @@ export interface TrainingSession {
   notes: string;
   status: SessionStatus;
   color?: string;
+  /** Sesion fija: el generador no la mueve ni la elimina. */
+  locked?: boolean;
 }
 
 export interface WeekConfig {
@@ -120,7 +136,8 @@ export type ValidationType =
   | "invalid-time"
   | "outside-visible-hours"
   | "venue-closed"
-  | "coach-unavailable";
+  | "coach-unavailable"
+  | "team-forbidden-day";
 
 export interface ValidationIssue {
   id: string;

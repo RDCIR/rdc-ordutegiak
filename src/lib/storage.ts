@@ -7,6 +7,7 @@ import {
   SessionStatus,
   SessionType,
   Team,
+  TeamNeeds,
   TimeRange,
   TrainingSession,
   Venue,
@@ -75,6 +76,19 @@ function sanitizeAvailability(value: unknown): WeeklyAvailability | undefined {
   return result;
 }
 
+function sanitizeNeeds(value: unknown): TeamNeeds | undefined {
+  if (!isRecord(value)) return undefined;
+  const forbiddenDays = Array.isArray(value.forbiddenDays)
+    ? value.forbiddenDays.filter((day): day is DayId => typeof day === "string" && dayIds.includes(day as DayId))
+    : [];
+  return {
+    sessionsPerWeek: typeof value.sessionsPerWeek === "number" ? value.sessionsPerWeek : 2,
+    sessionDurationMinutes: typeof value.sessionDurationMinutes === "number" ? value.sessionDurationMinutes : 90,
+    forbiddenDays,
+    preferredVenueId: typeof value.preferredVenueId === "string" ? value.preferredVenueId : null,
+  };
+}
+
 function sanitizeTeam(value: unknown): Team | null {
   if (!isRecord(value) || typeof value.id !== "string") return null;
   return {
@@ -84,6 +98,7 @@ function sanitizeTeam(value: unknown): Team | null {
     color: asString(value.color, "#64748b"),
     notes: asString(value.notes),
     active: asBoolean(value.active),
+    needs: sanitizeNeeds(value.needs),
   };
 }
 
@@ -135,6 +150,7 @@ function sanitizeSession(value: unknown): TrainingSession | null {
     notes: asString(value.notes),
     status,
     color: asOptionalString(value.color),
+    locked: value.locked === true || undefined,
   };
 }
 

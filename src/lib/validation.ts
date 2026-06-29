@@ -1,6 +1,7 @@
 import {
   AppData,
   Coach,
+  Team,
   TrainingSession,
   ValidationIssue,
   ValidationReport,
@@ -40,10 +41,12 @@ export function validateSessions(
   config: WeekConfig,
   venues: Venue[] = [],
   coaches: Coach[] = [],
+  teams: Team[] = [],
 ): ValidationReport {
   const issues: ValidationIssue[] = [];
   const venueById = new Map(venues.map((venue) => [venue.id, venue]));
   const coachById = new Map(coaches.map((coach) => [coach.id, coach]));
+  const teamById = new Map(teams.map((team) => [team.id, team]));
 
   for (const session of sessions) {
     const isPending = session.status === "pendiente";
@@ -103,6 +106,11 @@ export function validateSessions(
     ) {
       addIssue(issues, "coach-unavailable", "warning", "Entrenador fuera de su disponibilidad", [session.id]);
     }
+
+    const team = session.teamId ? teamById.get(session.teamId) : undefined;
+    if (team?.needs?.forbiddenDays?.includes(session.day)) {
+      addIssue(issues, "team-forbidden-day", "warning", "El equipo no entrena ese dia", [session.id]);
+    }
   }
 
   const placedSessions = sessions.filter(hasPlacedTime).filter((session) => session.status !== "pendiente");
@@ -155,7 +163,7 @@ export function summarizeReport(report: ValidationReport) {
 }
 
 export function applyDerivedSessionStatuses(data: AppData): AppData {
-  const report = validateSessions(data.sessions, data.config, data.venues, data.coaches);
+  const report = validateSessions(data.sessions, data.config, data.venues, data.coaches, data.teams);
   return {
     ...data,
     sessions: data.sessions.map((session) => {
