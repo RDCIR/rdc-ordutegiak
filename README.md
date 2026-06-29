@@ -2,6 +2,8 @@
 
 Organizador web de horarios para equipos, entrenadores y pistas. Es un MVP funcional pensado para cuadrar una semana de entrenamientos sin backend: arrastra sesiones, edita recursos, detecta conflictos y guarda todo en `localStorage`.
 
+**App en vivo:** https://rdcir.github.io/rdc-ordutegiak/
+
 ## Arquitectura
 
 - **React + TypeScript + Vite**: base ligera, mantenible y fácil de desplegar en GitHub Pages.
@@ -106,13 +108,12 @@ npm run build
 
 ## Despliegue en GitHub Pages
 
-El proyecto usa `base: "./"` en `vite.config.ts`, por lo que el build está preparado para publicarse como sitio estático.
+El despliegue es automatico: cada push a `main` dispara el workflow
+`.github/workflows/deploy.yml`, que hace el build de Vite y publica `dist/`
+en GitHub Pages. La app queda en https://rdcir.github.io/rdc-ordutegiak/
 
-```bash
-npm run build
-```
-
-Publica la carpeta `dist/` en GitHub Pages o mediante una GitHub Action.
+El proyecto usa `base: "./"` en `vite.config.ts`, por lo que los assets se
+cargan con rutas relativas y funciona servido desde el subdirectorio del repo.
 
 Para revisar localmente el build final:
 
