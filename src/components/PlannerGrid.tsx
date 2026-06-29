@@ -52,8 +52,20 @@ function Slot({ day, venue, slot, active, column, row }: SlotProps) {
   );
 }
 
-function getSessionLayoutLevels(sessions: TrainingSession[]) {
-  const result: Record<string, number> = {};
+interface SessionLayout {
+  /** Columna (0..columns-1) que ocupa la sesion dentro de su grupo solapado. */
+  level: number;
+  /** Numero total de columnas del grupo solapado (para repartir el ancho). */
+  columns: number;
+}
+
+/**
+ * Para cada sesion colocada calcula en que columna va y cuantas columnas
+ * comparten su "racimo" de solapes (mismo dia y pista). Asi las tarjetas que
+ * coinciden en hora se reparten el ancho en vez de pisarse.
+ */
+function getSessionLayout(sessions: TrainingSession[]): Record<string, SessionLayout> {
+  const result: Record<string, SessionLayout> = {};
   const groups = new Map<string, TrainingSession[]>();
 
   for (const session of sessions) {
@@ -64,22 +76,46 @@ function getSessionLayoutLevels(sessions: TrainingSession[]) {
     groups.set(key, [...(groups.get(key) ?? []), session]);
   }
 
+  // Asigna columnas a un racimo de sesiones que se solapan entre si.
+  const layoutCluster = (cluster: TrainingSession[]) => {
+    const columnEnds: number[] = [];
+    const columnOf: Record<string, number> = {};
+    for (const session of cluster) {
+      const start = timeToMinutes(session.startTime) ?? 0;
+      const end = timeToMinutes(session.endTime) ?? start;
+      let column = columnEnds.findIndex((columnEnd) => columnEnd <= start);
+      if (column === -1) {
+        column = columnEnds.length;
+      }
+      columnEnds[column] = end;
+      columnOf[session.id] = column;
+    }
+    const columns = columnEnds.length;
+    for (const session of cluster) {
+      result[session.id] = { level: columnOf[session.id], columns };
+    }
+  };
+
   for (const group of groups.values()) {
-    const levelEnds: number[] = [];
     const ordered = [...group].sort(
       (first, second) => (timeToMinutes(first.startTime) ?? 0) - (timeToMinutes(second.startTime) ?? 0),
     );
 
+    let cluster: TrainingSession[] = [];
+    let clusterEnd = -1;
     for (const session of ordered) {
       const start = timeToMinutes(session.startTime) ?? 0;
       const end = timeToMinutes(session.endTime) ?? start;
-      let level = levelEnds.findIndex((levelEnd) => levelEnd <= start);
-      if (level === -1) {
-        level = levelEnds.length;
+      // Si esta sesion empieza despues de que acabe todo el racimo, el racimo se cierra.
+      if (cluster.length > 0 && start >= clusterEnd) {
+        layoutCluster(cluster);
+        cluster = [];
+        clusterEnd = -1;
       }
-      levelEnds[level] = end;
-      result[session.id] = level;
+      cluster.push(session);
+      clusterEnd = Math.max(clusterEnd, end);
     }
+    layoutCluster(cluster);
   }
 
   return result;
@@ -99,7 +135,7 @@ export function PlannerGrid({ data, sessions, filters, report, onEditSession }: 
   const range = getGlobalVisibleRange(data.config);
   const slots = buildTimeSlots(range.start, range.end, data.config.blockMinutes);
   const columns = visibleDays.flatMap((day) => visibleVenues.map((venue) => ({ day, venue })));
-  const layoutLevels = getSessionLayoutLevels(sessions);
+  const sessionLayout = getSessionLayout(sessions);
   const globalStart = timeToMinutes(range.start) ?? 0;
 
   const scheduledSessions = useMemo(
@@ -209,7 +245,8 @@ export function PlannerGrid({ data, sessions, filters, report, onEditSession }: 
           const team = data.teams.find((entry) => entry.id === session.teamId);
           const coach = data.coaches.find((entry) => entry.id === session.coachId);
           const venue = data.venues.find((entry) => entry.id === session.venueId);
-          const level = layoutLevels[session.id] ?? 0;
+          const cell = sessionLayout[session.id] ?? { level: 0, columns: 1 };
+          const split = cell.columns > 1;
 
           return (
             <SessionCard
@@ -224,8 +261,9 @@ export function PlannerGrid({ data, sessions, filters, report, onEditSession }: 
               style={{
                 gridColumn: columnIndex + 2,
                 gridRow: `${slotIndex + 3} / span ${rowSpan}`,
-                marginLeft: level ? `${level * 10}px` : undefined,
-                zIndex: 20 + level,
+                width: split ? `calc(${100 / cell.columns}% - 6px)` : undefined,
+                marginLeft: split ? `calc(${(cell.level * 100) / cell.columns}% + 3px)` : undefined,
+                zIndex: 20 + cell.level,
               }}
             />
           );
