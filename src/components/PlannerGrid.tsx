@@ -7,6 +7,7 @@ import {
   buildTimeSlots,
   durationMinutes,
   getGlobalVisibleRange,
+  isSlotAvailable,
   isSlotInsideVisibleHours,
   timeToMinutes,
 } from "../lib/time";
@@ -228,7 +229,10 @@ export function PlannerGrid({ data, sessions, filters, report, onEditSession }: 
               day={column.day.id}
               venue={column.venue}
               slot={slot}
-              active={isSlotInsideVisibleHours(column.day.id, slot, data.config)}
+              active={
+                isSlotInsideVisibleHours(column.day.id, slot, data.config) &&
+                isSlotAvailable(column.venue.openHours, column.day.id, slot)
+              }
               column={columnIndex + 2}
               row={slotIndex + 3}
             />

@@ -1,4 +1,4 @@
-import { DAYS, DayId, WeekConfig } from "../types";
+import { DAYS, DayId, WeekConfig, WeeklyAvailability } from "../types";
 
 export function timeToMinutes(time?: string | null): number | null {
   if (!time || !/^\d{2}:\d{2}$/.test(time)) {
@@ -86,6 +86,54 @@ export function isSessionInsideVisibleHours(
     return false;
   }
   return start >= visibleStart && end <= visibleEnd;
+}
+
+/**
+ * Comprueba si el intervalo [start, end] cabe entero dentro de alguna franja
+ * disponible ese dia. `availability` sin definir = sin restriccion (true).
+ * Definida pero sin franjas ese dia = no disponible (false).
+ */
+export function fitsInAvailability(
+  availability: WeeklyAvailability | undefined,
+  day: DayId,
+  startTime: string,
+  endTime: string,
+): boolean {
+  if (!availability) {
+    return true;
+  }
+  const start = timeToMinutes(startTime);
+  const end = timeToMinutes(endTime);
+  const windows = availability[day] ?? [];
+  if (start === null || end === null || windows.length === 0) {
+    return false;
+  }
+  return windows.some((window) => {
+    const windowStart = timeToMinutes(window.start);
+    const windowEnd = timeToMinutes(window.end);
+    return windowStart !== null && windowEnd !== null && start >= windowStart && end <= windowEnd;
+  });
+}
+
+/** Comprueba si un hueco (instante de inicio) cae dentro de alguna franja del dia. */
+export function isSlotAvailable(
+  availability: WeeklyAvailability | undefined,
+  day: DayId,
+  slot: string,
+): boolean {
+  if (!availability) {
+    return true;
+  }
+  const slotStart = timeToMinutes(slot);
+  const windows = availability[day] ?? [];
+  if (slotStart === null) {
+    return false;
+  }
+  return windows.some((window) => {
+    const windowStart = timeToMinutes(window.start);
+    const windowEnd = timeToMinutes(window.end);
+    return windowStart !== null && windowEnd !== null && slotStart >= windowStart && slotStart < windowEnd;
+  });
 }
 
 export function isSlotInsideVisibleHours(day: DayId, slot: string, config: WeekConfig): boolean {

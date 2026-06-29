@@ -1,13 +1,15 @@
 import {
   AppData,
+  Coach,
   TrainingSession,
   ValidationIssue,
   ValidationReport,
   ValidationSeverity,
   ValidationType,
+  Venue,
   WeekConfig,
 } from "../types";
-import { isSessionInsideVisibleHours, rangesOverlap, timeToMinutes } from "./time";
+import { fitsInAvailability, isSessionInsideVisibleHours, rangesOverlap, timeToMinutes } from "./time";
 
 function addIssue(
   issues: ValidationIssue[],
@@ -36,8 +38,12 @@ function hasPlacedTime(session: TrainingSession): session is TrainingSession & {
 export function validateSessions(
   sessions: TrainingSession[],
   config: WeekConfig,
+  venues: Venue[] = [],
+  coaches: Coach[] = [],
 ): ValidationReport {
   const issues: ValidationIssue[] = [];
+  const venueById = new Map(venues.map((venue) => [venue.id, venue]));
+  const coachById = new Map(coaches.map((coach) => [coach.id, coach]));
 
   for (const session of sessions) {
     const isPending = session.status === "pendiente";
@@ -80,6 +86,22 @@ export function validateSessions(
 
     if (!isSessionInsideVisibleHours(session.day, session.startTime, session.endTime, config)) {
       addIssue(issues, "outside-visible-hours", "error", "Sesion fuera del horario visible", [session.id]);
+    }
+
+    const venue = session.venueId ? venueById.get(session.venueId) : undefined;
+    if (
+      venue?.openHours &&
+      !fitsInAvailability(venue.openHours, session.day, session.startTime, session.endTime)
+    ) {
+      addIssue(issues, "venue-closed", "error", "Pista cerrada a esa hora", [session.id]);
+    }
+
+    const coach = session.coachId ? coachById.get(session.coachId) : undefined;
+    if (
+      coach?.availabilityWindows &&
+      !fitsInAvailability(coach.availabilityWindows, session.day, session.startTime, session.endTime)
+    ) {
+      addIssue(issues, "coach-unavailable", "warning", "Entrenador fuera de su disponibilidad", [session.id]);
     }
   }
 
@@ -133,7 +155,7 @@ export function summarizeReport(report: ValidationReport) {
 }
 
 export function applyDerivedSessionStatuses(data: AppData): AppData {
-  const report = validateSessions(data.sessions, data.config);
+  const report = validateSessions(data.sessions, data.config, data.venues, data.coaches);
   return {
     ...data,
     sessions: data.sessions.map((session) => {

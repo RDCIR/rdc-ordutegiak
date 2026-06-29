@@ -79,4 +79,43 @@ describe("validateSessions", () => {
       expect.arrayContaining(["invalid-time", "outside-visible-hours"]),
     );
   });
+
+  it("flags a session as an error when its venue is closed at that time", () => {
+    const data = createSampleData();
+    // El gimnasio abre L-V; sabado esta cerrado.
+    const session: TrainingSession = {
+      ...data.sessions[0],
+      id: "venue-closed-test",
+      venueId: "venue-gimnasio",
+      coachId: null,
+      day: "saturday",
+      startTime: "10:00",
+      endTime: "11:00",
+      status: "colocada",
+    };
+    const report = validateSessions([session], data.config, data.venues, data.coaches);
+    const issue = report.issues.find((entry) => entry.type === "venue-closed");
+
+    expect(issue?.severity).toBe("error");
+  });
+
+  it("warns (not error) when a coach is placed outside their availability", () => {
+    const data = createSampleData();
+    // Maialen solo esta disponible M-J; el lunes esta fuera de su disponibilidad.
+    const session: TrainingSession = {
+      ...data.sessions[0],
+      id: "coach-unavailable-test",
+      coachId: "coach-maialen",
+      venueId: "venue-pista-1",
+      day: "monday",
+      startTime: "16:00",
+      endTime: "17:00",
+      status: "colocada",
+    };
+    const report = validateSessions([session], data.config, data.venues, data.coaches);
+    const issue = report.issues.find((entry) => entry.type === "coach-unavailable");
+
+    expect(issue?.severity).toBe("warning");
+    expect(report.issues.some((entry) => entry.type === "venue-closed")).toBe(false);
+  });
 });

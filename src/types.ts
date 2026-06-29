@@ -24,6 +24,15 @@ export type ColorCriterion = "team" | "coach" | "venue" | "category";
 
 export type Language = "es" | "eu";
 
+/** Una franja horaria "HH:MM"-"HH:MM". */
+export interface TimeRange {
+  start: string;
+  end: string;
+}
+
+/** Franjas disponibles por dia de la semana. Un dia ausente = no disponible ese dia. */
+export type WeeklyAvailability = Partial<Record<DayId, TimeRange[]>>;
+
 export interface Team {
   id: string;
   name: string;
@@ -37,6 +46,8 @@ export interface Coach {
   id: string;
   name: string;
   availability?: string;
+  /** Franjas en que el entrenador esta disponible. Sin definir = disponible siempre. */
+  availabilityWindows?: WeeklyAvailability;
   color?: string;
   notes: string;
   active: boolean;
@@ -47,6 +58,8 @@ export interface Venue {
   name: string;
   type: string;
   capacity?: number;
+  /** Horario-marco: franjas en que la pista esta abierta. Sin definir = abierta siempre. */
+  openHours?: WeeklyAvailability;
   notes: string;
   active: boolean;
 }
@@ -105,7 +118,9 @@ export type ValidationType =
   | "missing-coach"
   | "missing-time"
   | "invalid-time"
-  | "outside-visible-hours";
+  | "outside-visible-hours"
+  | "venue-closed"
+  | "coach-unavailable";
 
 export interface ValidationIssue {
   id: string;

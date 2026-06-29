@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { Coach, Team, Venue } from "../types";
 import { makeId } from "../lib/ids";
 import { useT } from "../lib/i18n";
+import { AvailabilityEditor } from "./AvailabilityEditor";
 
 export type ResourceKind = "team" | "coach" | "venue";
 type ResourceValue = Team | Coach | Venue;
@@ -118,6 +119,13 @@ export function ResourceEditorModal({ kind, resource, onSave, onClose }: Resourc
                   onChange={(event) => patchDraft({ color: event.target.value } as Partial<ResourceValue>)}
                 />
               </label>
+              <AvailabilityEditor
+                value={(draft as Coach).availabilityWindows}
+                onChange={(availabilityWindows) => patchDraft({ availabilityWindows } as Partial<ResourceValue>)}
+                limitLabel={t("avail.limitCoach")}
+                noLimitHint={t("avail.noLimitCoach")}
+                defaultRange={{ start: "16:00", end: "21:00" }}
+              />
             </>
           )}
 
@@ -138,6 +146,13 @@ export function ResourceEditorModal({ kind, resource, onSave, onClose }: Resourc
                   }
                 />
               </label>
+              <AvailabilityEditor
+                value={(draft as Venue).openHours}
+                onChange={(openHours) => patchDraft({ openHours } as Partial<ResourceValue>)}
+                limitLabel={t("avail.limitVenue")}
+                noLimitHint={t("avail.noLimitVenue")}
+                defaultRange={{ start: "16:00", end: "22:00" }}
+              />
             </>
           )}
 

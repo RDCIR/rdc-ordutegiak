@@ -7,8 +7,10 @@ import {
   SessionStatus,
   SessionType,
   Team,
+  TimeRange,
   TrainingSession,
   Venue,
+  WeeklyAvailability,
 } from "../types";
 
 export const STORAGE_KEY = "iraurgi-ordu-planner-v1";
@@ -49,6 +51,29 @@ const sessionTypes: SessionType[] = [
 ];
 const sessionStatuses: SessionStatus[] = ["pendiente", "colocada", "conflicto"];
 const dayIds = DAYS.map((day) => day.id);
+const timeRe = /^\d{2}:\d{2}$/;
+
+function sanitizeTimeRange(value: unknown): TimeRange | null {
+  if (!isRecord(value)) return null;
+  const { start, end } = value;
+  if (typeof start !== "string" || typeof end !== "string") return null;
+  if (!timeRe.test(start) || !timeRe.test(end)) return null;
+  return { start, end };
+}
+
+/** Sanea un horario semanal. Devuelve undefined si el campo no estaba (= sin limite). */
+function sanitizeAvailability(value: unknown): WeeklyAvailability | undefined {
+  if (!isRecord(value)) return undefined;
+  const result: WeeklyAvailability = {};
+  for (const day of dayIds) {
+    const ranges = value[day];
+    if (Array.isArray(ranges)) {
+      const clean = ranges.map(sanitizeTimeRange).filter((range): range is TimeRange => range !== null);
+      if (clean.length > 0) result[day] = clean;
+    }
+  }
+  return result;
+}
 
 function sanitizeTeam(value: unknown): Team | null {
   if (!isRecord(value) || typeof value.id !== "string") return null;
@@ -68,6 +93,7 @@ function sanitizeCoach(value: unknown): Coach | null {
     id: value.id,
     name: asString(value.name, "Entrenador sin nombre"),
     availability: asOptionalString(value.availability),
+    availabilityWindows: sanitizeAvailability(value.availabilityWindows),
     color: asOptionalString(value.color),
     notes: asString(value.notes),
     active: asBoolean(value.active),
@@ -81,6 +107,7 @@ function sanitizeVenue(value: unknown): Venue | null {
     name: asString(value.name, "Pista sin nombre"),
     type: asString(value.type, "Pista"),
     capacity: typeof value.capacity === "number" ? value.capacity : undefined,
+    openHours: sanitizeAvailability(value.openHours),
     notes: asString(value.notes),
     active: asBoolean(value.active),
   };

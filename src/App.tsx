@@ -69,7 +69,10 @@ export function App() {
     }),
   );
 
-  const report = useMemo(() => validateSessions(data.sessions, data.config), [data.config, data.sessions]);
+  const report = useMemo(
+    () => validateSessions(data.sessions, data.config, data.venues, data.coaches),
+    [data.config, data.sessions, data.venues, data.coaches],
+  );
   const issueSummary = useMemo(() => summarizeReport(report), [report]);
   const filteredSessions = useMemo(
     () => data.sessions.filter((session) => matchesFilters(session, filters)),

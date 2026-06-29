@@ -36,12 +36,13 @@ Organizador web de horarios para equipos, entrenadores y pistas. Es un MVP funci
 - Importacion robusta: descarta entradas con formato invalido sin romper la app.
 - Imprimir o guardar como PDF la vista actual en formato agenda (respeta los filtros: completo, por equipo o por entrenador).
 - Interfaz bilingue euskara / castellano con interruptor; el idioma se guarda con la planificacion (por defecto euskara).
+- Horario-marco por pista (cuando esta abierta cada dia) y disponibilidad por entrenador: colocar fuera marca error (pista cerrada) o aviso (entrenador no disponible); las horas cerradas de cada pista se sombrean en la rejilla.
 
 ## Modelo de datos
 
 - `Team`: id, nombre, categoria, color, notas, activo.
-- `Coach`: id, nombre, disponibilidad, color, notas, activo.
-- `Venue`: id, nombre, tipo, capacidad, notas, activo.
+- `Coach`: id, nombre, disponibilidad (texto), franjas de disponibilidad por dia, color, notas, activo.
+- `Venue`: id, nombre, tipo, capacidad, horario-marco (franjas abiertas por dia), notas, activo.
 - `TrainingSession`: id, equipo, entrenador opcional, pista, dia, inicio, fin, tipo, notas, estado y color.
 - `WeekConfig`: dias visibles, horarios visibles, duracion de bloque, idioma, tema y criterio de color.
 
@@ -137,7 +138,7 @@ Incluye 5 equipos, 4 entrenadores, 3 pistas y 8 sesiones. Una sesion empieza com
 ## Limitaciones del MVP
 
 - La planificacion es una semana tipo, no semanas con fecha real.
-- La disponibilidad de entrenadores y pistas esta preparada como campo, pero no bloquea huecos todavia.
+- Cada pista/entrenador admite una franja por dia (no varias franjas en el mismo dia, de momento).
 - El deshacer es de un solo sentido (sin rehacer) y vive en memoria: se pierde al recargar.
 - No hay backend ni multiusuario; las copias diarias son locales a este navegador.
 

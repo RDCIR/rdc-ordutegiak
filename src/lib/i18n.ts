@@ -114,6 +114,12 @@ const es: Dict = {
   // Confirms
   "confirm.import": "Importar reemplazara la planificacion actual. Podras deshacerlo. ¿Continuar?",
   "confirm.reset": "Esto reemplazara TODA la planificacion actual por los datos de prueba. ¿Seguro?",
+  // Disponibilidad / horario-marco
+  "avail.limitVenue": "Limitar el horario de la pista",
+  "avail.noLimitVenue": "Sin limite: la pista esta abierta a cualquier hora.",
+  "avail.limitCoach": "Limitar la disponibilidad",
+  "avail.noLimitCoach": "Sin limite: disponible a cualquier hora.",
+  "avail.to": "a",
 };
 
 const eu: Dict = {
@@ -216,6 +222,11 @@ const eu: Dict = {
   "toast.undone": "Aldaketa deseginda",
   "confirm.import": "Inportatzeak uneko plangintza ordeztuko du. Desegin ahal izango duzu. Jarraitu?",
   "confirm.reset": "Honek uneko plangintza OSOA proba-datuekin ordeztuko du. Ziur?",
+  "avail.limitVenue": "Pistaren ordutegia mugatu",
+  "avail.noLimitVenue": "Mugarik gabe: pista beti dago irekita.",
+  "avail.limitCoach": "Eskuragarritasuna mugatu",
+  "avail.noLimitCoach": "Mugarik gabe: beti eskuragarri.",
+  "avail.to": "-",
 };
 
 const dictionaries: Record<Language, Dict> = { es, eu };
@@ -247,6 +258,15 @@ const dayLabels: Record<Language, Record<DayId, string>> = {
 
 export function dayLabel(lang: Language, id: DayId): string {
   return dayLabels[lang][id];
+}
+
+const dayShortLabels: Record<Language, Record<DayId, string>> = {
+  es: { monday: "Lun", tuesday: "Mar", wednesday: "Mie", thursday: "Jue", friday: "Vie", saturday: "Sab", sunday: "Dom" },
+  eu: { monday: "Al", tuesday: "Ar", wednesday: "Az", thursday: "Og", friday: "Or", saturday: "Lr", sunday: "Ig" },
+};
+
+export function dayShort(lang: Language, id: DayId): string {
+  return dayShortLabels[lang][id];
 }
 
 const sessionTypeLabels: Record<Language, Record<SessionType, string>> = {
@@ -282,6 +302,8 @@ const issueMessages: Record<Language, Record<string, string>> = {
     "missing-time.error": "Sesion sin dia, inicio o fin",
     "invalid-time": "Hora fin anterior o igual a la hora inicio",
     "outside-visible-hours": "Sesion fuera del horario visible",
+    "venue-closed": "Pista cerrada a esa hora",
+    "coach-unavailable": "Entrenador fuera de su disponibilidad",
     "venue-overlap": "Conflicto de pista",
     "coach-overlap": "Conflicto de entrenador",
     "team-overlap": "Conflicto de equipo",
@@ -295,6 +317,8 @@ const issueMessages: Record<Language, Record<string, string>> = {
     "missing-time.error": "Saioa egunik, hasierarik edo amaierarik gabe",
     "invalid-time": "Amaiera-ordua hasierakoaren berdina edo lehenagokoa",
     "outside-visible-hours": "Saioa ikusgai dagoen ordutegitik kanpo",
+    "venue-closed": "Pista itxita ordu horretan",
+    "coach-unavailable": "Entrenatzailea bere eskuragarritasunetik kanpo",
     "venue-overlap": "Pista-gatazka",
     "coach-overlap": "Entrenatzaile-gatazka",
     "team-overlap": "Talde-gatazka",
