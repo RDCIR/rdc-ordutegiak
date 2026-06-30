@@ -144,6 +144,7 @@ const es: Dict = {
   "week.today": "Hoy",
   "toast.weekEmpty": "La semana esta vacia: nada que duplicar.",
   "btn.duplicateWeekTitle": "Copia las sesiones de esta semana a la semana siguiente",
+  "session.resize": "Arrastra para cambiar la duracion",
 };
 
 const eu: Dict = {
@@ -272,6 +273,7 @@ const eu: Dict = {
   "week.today": "Gaur",
   "toast.weekEmpty": "Astea hutsik dago: ez dago zer bikoiztu.",
   "btn.duplicateWeekTitle": "Aste honetako saioak hurrengo astera kopiatzen ditu",
+  "session.resize": "Arrastatu iraupena aldatzeko",
 };
 
 const dictionaries: Record<Language, Dict> = { es, eu };

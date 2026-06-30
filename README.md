@@ -23,6 +23,7 @@ Organizador web de horarios para equipos, entrenadores y pistas. Es un MVP funci
 
 - Vista semanal con dias, pistas y bloques de 30 minutos.
 - Sesiones arrastrables desde pendientes al horario y entre huecos.
+- Redimensionar una sesion arrastrando su borde inferior para alargar o acortar la duracion (en bloques de 30 min).
 - Crear, editar y eliminar sesiones.
 - Crear, editar y desactivar equipos, entrenadores y pistas.
 - Si se desactiva una pista con sesiones, esas sesiones pasan a pendientes.

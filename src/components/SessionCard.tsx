@@ -1,8 +1,9 @@
 import { useDraggable } from "@dnd-kit/core";
 import { AlertTriangle, Clock, GripVertical, Lock } from "lucide-react";
-import { CSSProperties, KeyboardEvent } from "react";
+import { CSSProperties, KeyboardEvent, PointerEvent as ReactPointerEvent, useRef, useState } from "react";
 import { Coach, Team, TrainingSession, ValidationIssue, Venue } from "../types";
 import { issueMessage, sessionTypeLabel, useLanguage, useT } from "../lib/i18n";
+import { addMinutes, durationMinutes } from "../lib/time";
 
 interface SessionCardProps {
   session: TrainingSession;
@@ -13,6 +14,14 @@ interface SessionCardProps {
   variant?: "pending" | "scheduled";
   style?: CSSProperties;
   onEdit: (sessionId: string) => void;
+  /** Redimensionar arrastrando el borde inferior (solo sesiones colocadas). */
+  onResize?: (sessionId: string, newEndTime: string) => void;
+  /** Minutos por fila de la rejilla (bloque). */
+  slotMinutes?: number;
+  /** Alto en px de una fila de la rejilla. */
+  slotHeight?: number;
+  /** Maximo de filas que puede ocupar sin salirse de la rejilla visible. */
+  maxRows?: number;
 }
 
 function formatSessionTime(session: TrainingSession, minLabel: string): string {
@@ -31,6 +40,10 @@ export function SessionCard({
   variant = "scheduled",
   style,
   onEdit,
+  onResize,
+  slotMinutes = 30,
+  slotHeight = 36,
+  maxRows,
 }: SessionCardProps) {
   const t = useT();
   const lang = useLanguage();
@@ -38,6 +51,51 @@ export function SessionCard({
     id: `session|${session.id}`,
     data: { sessionId: session.id },
   });
+
+  const canResize = variant === "scheduled" && Boolean(onResize) && Boolean(session.startTime && session.endTime);
+  const baseRows = Math.max(1, Math.ceil(durationMinutes(session.startTime, session.endTime) / slotMinutes));
+  const [previewRows, setPreviewRows] = useState<number | null>(null);
+  const resizeRef = useRef<{ startY: number; rows: number } | null>(null);
+
+  const handleResizeDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!canResize) return;
+    event.stopPropagation();
+    event.preventDefault();
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Sin puntero activo (p. ej. eventos sinteticos): el arrastre sigue funcionando.
+    }
+    resizeRef.current = { startY: event.clientY, rows: baseRows };
+    setPreviewRows(baseRows);
+  };
+
+  const handleResizeMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const state = resizeRef.current;
+    if (!state) return;
+    event.stopPropagation();
+    const deltaRows = Math.round((event.clientY - state.startY) / slotHeight);
+    const upper = maxRows ?? Number.MAX_SAFE_INTEGER;
+    const rows = Math.max(1, Math.min(baseRows + deltaRows, upper));
+    state.rows = rows;
+    setPreviewRows(rows);
+  };
+
+  const finishResize = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const state = resizeRef.current;
+    if (!state) return;
+    event.stopPropagation();
+    resizeRef.current = null;
+    setPreviewRows(null);
+    try {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    } catch {
+      // ignorar si no habia captura
+    }
+    if (onResize && session.startTime && state.rows !== baseRows) {
+      onResize(session.id, addMinutes(session.startTime, state.rows * slotMinutes));
+    }
+  };
 
   const hasError = issues.some((issue) => issue.severity === "error");
   const hasWarning = issues.some((issue) => issue.severity === "warning");
@@ -67,7 +125,12 @@ export function SessionCard({
       ]
         .filter(Boolean)
         .join(" ")}
-      style={{ ...style, ...transformStyle, borderLeftColor: color }}
+      style={{
+        ...style,
+        ...transformStyle,
+        ...(previewRows != null ? { gridRowEnd: `span ${previewRows}` } : null),
+        borderLeftColor: color,
+      }}
       {...attributes}
       {...listeners}
       role="button"
@@ -103,6 +166,18 @@ export function SessionCard({
       </div>
       {variant === "pending" && venue?.name && <div className="session-card__venue">{venue.name}</div>}
       <div className="session-card__type">{sessionTypeLabel(lang, session.type)}</div>
+      {canResize && (
+        <div
+          className="session-card__resize"
+          title={t("session.resize")}
+          aria-hidden="true"
+          onPointerDown={handleResizeDown}
+          onPointerMove={handleResizeMove}
+          onPointerUp={finishResize}
+          onPointerCancel={finishResize}
+          onClick={(event) => event.stopPropagation()}
+        />
+      )}
     </div>
   );
 }

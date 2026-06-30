@@ -22,6 +22,7 @@ interface PlannerGridProps {
   report: ValidationReport;
   weekStart: string;
   onEditSession: (sessionId: string) => void;
+  onResizeSession: (sessionId: string, newEndTime: string) => void;
 }
 
 interface SlotProps {
@@ -124,7 +125,7 @@ function getSessionLayout(sessions: TrainingSession[]): Record<string, SessionLa
   return result;
 }
 
-export function PlannerGrid({ data, sessions, filters, report, weekStart, onEditSession }: PlannerGridProps) {
+export function PlannerGrid({ data, sessions, filters, report, weekStart, onEditSession, onResizeSession }: PlannerGridProps) {
   const t = useT();
   const lang = useLanguage();
   const shellRef = useRef<HTMLElement | null>(null);
@@ -264,6 +265,10 @@ export function PlannerGrid({ data, sessions, filters, report, weekStart, onEdit
               issues={report.bySessionId[session.id] ?? []}
               variant="scheduled"
               onEdit={onEditSession}
+              onResize={onResizeSession}
+              slotMinutes={data.config.blockMinutes}
+              slotHeight={36}
+              maxRows={slots.length - slotIndex}
               style={{
                 gridColumn: columnIndex + 2,
                 gridRow: `${slotIndex + 3} / span ${rowSpan}`,

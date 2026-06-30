@@ -161,6 +161,16 @@ export function App() {
     setToast({ key: "toast.sessionSaved" });
   };
 
+  const handleResizeSession = (sessionId: string, newEndTime: string) => {
+    updateData((current) => ({
+      ...current,
+      sessions: current.sessions.map((session) => {
+        if (session.id !== sessionId || !session.startTime) return session;
+        return { ...session, endTime: newEndTime, durationMinutes: durationMinutes(session.startTime, newEndTime) };
+      }),
+    }));
+  };
+
   const handleDeleteSession = (sessionId: string) => {
     updateData((current) => ({
       ...current,
@@ -425,6 +435,7 @@ export function App() {
             report={report}
             weekStart={currentWeekStart}
             onEditSession={(sessionId) => setEditingSessionId(sessionId)}
+            onResizeSession={handleResizeSession}
           />
 
           <PrintView data={data} sessions={filteredSessions} filters={filters} weekStart={currentWeekStart} />
