@@ -40,6 +40,7 @@ Organizador web de horarios para equipos, entrenadores y pistas. Es un MVP funci
 - Necesidades por equipo (sesiones por semana, duracion, pista preferida y dias en los que no puede entrenar) como base del futuro generador; aviso si colocas un equipo en un dia que tiene prohibido.
 - Sesiones fijas: marca una sesion con candado para que el generador no la mueva.
 - Generador de horario ("Generar"): coloca automaticamente las sesiones que faltan de cada equipo respetando reglas duras (pista abierta, sin choques, dias permitidos) y preferencias (pista preferida, repartir entre dias); no toca las sesiones fijas, es idempotente (volver a generar no duplica) y avisa de lo que no cabe. Modelo "genera y tu retocas".
+- Semanas con fecha real: navegacion entre semanas (anterior / siguiente / hoy), fechas reales en las cabeceras, cada semana con su propia planificacion. "Duplicar semana" copia la semana actual a la siguiente. Validacion y generador trabajan dentro de la semana visible.
 
 ## Modelo de datos
 
@@ -140,7 +141,7 @@ Incluye 5 equipos, 4 entrenadores, 3 pistas y 8 sesiones. Una sesion empieza com
 
 ## Limitaciones del MVP
 
-- La planificacion es una semana tipo, no semanas con fecha real.
+- Las semanas tienen fecha real, pero no hay aun un calendario de temporada (festivos, partidos con fecha concreta).
 - Cada pista/entrenador admite una franja por dia (no varias franjas en el mismo dia, de momento).
 - El deshacer es de un solo sentido (sin rehacer) y vive en memoria: se pierde al recargar.
 - No hay backend ni multiusuario; las copias diarias son locales a este navegador.

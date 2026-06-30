@@ -1,11 +1,13 @@
 import { AppData, DAYS, DayId, Filters, Language, TrainingSession } from "../types";
 import { timeToMinutes } from "../lib/time";
 import { dayLabel, sessionTypeLabel, useLanguage, useT } from "../lib/i18n";
+import { formatWeekRange } from "../lib/dates";
 
 interface PrintViewProps {
   data: AppData;
   sessions: TrainingSession[];
   filters: Filters;
+  weekStart: string;
 }
 
 function isPlaced(session: TrainingSession): boolean {
@@ -40,7 +42,7 @@ function describeFilters(
   return parts.length > 0 ? parts.join(" · ") : t("print.fullSchedule");
 }
 
-export function PrintView({ data, sessions, filters }: PrintViewProps) {
+export function PrintView({ data, sessions, filters, weekStart }: PrintViewProps) {
   const t = useT();
   const lang = useLanguage();
   const teamName = (id?: string | null) => data.teams.find((team) => team.id === id)?.name ?? t("opt.noTeam");
@@ -62,7 +64,9 @@ export function PrintView({ data, sessions, filters }: PrintViewProps) {
       <header className="print-view__header">
         <div>
           <h1>{t("print.title")}</h1>
-          <p>{t("print.subtitle")}</p>
+          <p>
+            {t("print.subtitle")} · {formatWeekRange(weekStart, lang)}
+          </p>
         </div>
         <div className="print-view__meta">
           <strong>{describeFilters(data, filters, lang, t)}</strong>

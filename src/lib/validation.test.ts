@@ -24,6 +24,23 @@ describe("validateSessions", () => {
     expect(issueTypes([data.sessions[0], conflict])).toContain("venue-overlap");
   });
 
+  it("does NOT flag overlap for identical sessions in different weeks", () => {
+    const base = {
+      ...createSampleData().sessions[0],
+      venueId: "venue-pista-1",
+      day: "monday" as const,
+      startTime: "16:00",
+      endTime: "17:30",
+      status: "colocada" as const,
+    };
+    const weekOne: TrainingSession = { ...base, id: "wk1", weekStart: "2026-01-05" };
+    const weekTwo: TrainingSession = { ...base, id: "wk2", weekStart: "2026-01-12" };
+
+    const types = issueTypes([weekOne, weekTwo]);
+    expect(types).not.toContain("venue-overlap");
+    expect(types).not.toContain("team-overlap");
+  });
+
   it("detects coach overlap across different venues", () => {
     const data = createSampleData();
     const conflict: TrainingSession = {

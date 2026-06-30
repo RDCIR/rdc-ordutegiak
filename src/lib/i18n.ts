@@ -109,7 +109,7 @@ const es: Dict = {
   "toast.imported": "Planificacion importada",
   "toast.importError": "No se ha podido importar el JSON",
   "toast.sampleRestored": "Datos de prueba restaurados",
-  "toast.weekDuplicated": "Semana duplicada como sesiones pendientes",
+  "toast.weekDuplicated": "Semana copiada a la semana siguiente",
   "toast.undone": "Cambio deshecho",
   // Confirms
   "confirm.import": "Importar reemplazara la planificacion actual. Podras deshacerlo. ¿Continuar?",
@@ -138,6 +138,12 @@ const es: Dict = {
   "gen.nothing": "Nada que generar: los equipos ya tienen sus sesiones (define necesidades en cada equipo).",
   "gen.unplacedTitle": "Sin hueco para:",
   "gen.dismiss": "Descartar",
+  // Semanas con fecha
+  "week.prev": "Semana anterior",
+  "week.next": "Semana siguiente",
+  "week.today": "Hoy",
+  "toast.weekEmpty": "La semana esta vacia: nada que duplicar.",
+  "btn.duplicateWeekTitle": "Copia las sesiones de esta semana a la semana siguiente",
 };
 
 const eu: Dict = {
@@ -236,7 +242,7 @@ const eu: Dict = {
   "toast.imported": "Plangintza inportatuta",
   "toast.importError": "Ezin izan da JSONa inportatu",
   "toast.sampleRestored": "Proba-datuak berrezarrita",
-  "toast.weekDuplicated": "Astea bikoiztuta zain dauden saio gisa",
+  "toast.weekDuplicated": "Astea hurrengo astera kopiatuta",
   "toast.undone": "Aldaketa deseginda",
   "confirm.import": "Inportatzeak uneko plangintza ordeztuko du. Desegin ahal izango duzu. Jarraitu?",
   "confirm.reset": "Honek uneko plangintza OSOA proba-datuekin ordeztuko du. Ziur?",
@@ -261,6 +267,11 @@ const eu: Dict = {
   "gen.nothing": "Ez dago ezer sortzeko: taldeek dagoeneko badituzte beren saioak (zehaztu beharrak talde bakoitzean).",
   "gen.unplacedTitle": "Lekurik gabe:",
   "gen.dismiss": "Baztertu",
+  "week.prev": "Aurreko astea",
+  "week.next": "Hurrengo astea",
+  "week.today": "Gaur",
+  "toast.weekEmpty": "Astea hutsik dago: ez dago zer bikoiztu.",
+  "btn.duplicateWeekTitle": "Aste honetako saioak hurrengo astera kopiatzen ditu",
 };
 
 const dictionaries: Record<Language, Dict> = { es, eu };

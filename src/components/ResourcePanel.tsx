@@ -8,6 +8,8 @@ type ResourceKind = "team" | "coach" | "venue";
 
 interface ResourcePanelProps {
   data: AppData;
+  /** Sesiones de la semana visible (para la lista de pendientes). */
+  sessions: AppData["sessions"];
   report: ValidationReport;
   onEditResource: (kind: ResourceKind, id?: string) => void;
   onDeleteResource: (kind: ResourceKind, id: string) => void;
@@ -47,6 +49,7 @@ function ResourceSection({
 
 export function ResourcePanel({
   data,
+  sessions,
   report,
   onEditResource,
   onDeleteResource,
@@ -54,7 +57,7 @@ export function ResourcePanel({
   onCreateSession,
 }: ResourcePanelProps) {
   const t = useT();
-  const pendingSessions = data.sessions.filter(
+  const pendingSessions = sessions.filter(
     (session) => session.status === "pendiente" || !session.day || !session.venueId || !session.startTime || !session.endTime,
   );
 

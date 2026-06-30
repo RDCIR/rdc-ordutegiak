@@ -60,7 +60,7 @@ describe("generateSchedule", () => {
       [team("t", { sessionsPerWeek: 2, sessionDurationMinutes: 60, forbiddenDays: [], preferredVenueId: null })],
       [venue("v")],
     );
-    const result = generateSchedule(data);
+    const result = generateSchedule(data, "2026-01-05");
 
     expect(result.created).toBe(2);
     expect(result.unplaced).toHaveLength(0);
@@ -79,7 +79,7 @@ describe("generateSchedule", () => {
       ],
       [venue("v")],
     );
-    const result = generateSchedule(data);
+    const result = generateSchedule(data, "2026-01-05");
 
     expect(result.created).toBe(3);
     expect(result.sessions.every((session) => session.day === "monday")).toBe(true);
@@ -92,7 +92,7 @@ describe("generateSchedule", () => {
       // La pista solo abre 60 min: no cabe una sesion de 120.
       [venue("v", { monday: [{ start: "16:00", end: "17:00" }] })],
     );
-    const result = generateSchedule(data);
+    const result = generateSchedule(data, "2026-01-05");
 
     expect(result.created).toBe(0);
     expect(result.unplaced).toEqual([{ teamId: "t", remaining: 1 }]);
@@ -103,7 +103,7 @@ describe("generateSchedule", () => {
       [team("t", { sessionsPerWeek: 1, sessionDurationMinutes: 60, forbiddenDays: [], preferredVenueId: "v2" })],
       [venue("v1"), venue("v2")],
     );
-    const result = generateSchedule(data);
+    const result = generateSchedule(data, "2026-01-05");
 
     expect(result.created).toBe(1);
     expect(result.sessions[0].venueId).toBe("v2");

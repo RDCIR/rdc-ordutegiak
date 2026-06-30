@@ -13,12 +13,14 @@ import {
 } from "../lib/time";
 import { SessionCard } from "./SessionCard";
 import { dayLabel, useLanguage, useT } from "../lib/i18n";
+import { dateForDay, dayOfMonth } from "../lib/dates";
 
 interface PlannerGridProps {
   data: AppData;
   sessions: TrainingSession[];
   filters: Filters;
   report: ValidationReport;
+  weekStart: string;
   onEditSession: (sessionId: string) => void;
 }
 
@@ -122,7 +124,7 @@ function getSessionLayout(sessions: TrainingSession[]): Record<string, SessionLa
   return result;
 }
 
-export function PlannerGrid({ data, sessions, filters, report, onEditSession }: PlannerGridProps) {
+export function PlannerGrid({ data, sessions, filters, report, weekStart, onEditSession }: PlannerGridProps) {
   const t = useT();
   const lang = useLanguage();
   const shellRef = useRef<HTMLElement | null>(null);
@@ -202,7 +204,7 @@ export function PlannerGrid({ data, sessions, filters, report, onEditSession }: 
               gridRow: 1,
             }}
           >
-            {dayLabel(lang, day.id)}
+            {dayLabel(lang, day.id)} <span className="planner-day-header__date">{dayOfMonth(dateForDay(weekStart, day.id))}</span>
           </div>
         ))}
 

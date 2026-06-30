@@ -119,7 +119,12 @@ export function validateSessions(
     for (let secondIndex = firstIndex + 1; secondIndex < placedSessions.length; secondIndex += 1) {
       const first = placedSessions[firstIndex];
       const second = placedSessions[secondIndex];
-      if (first.day !== second.day || !rangesOverlap(first.startTime, first.endTime, second.startTime, second.endTime)) {
+      // Solo chocan sesiones de la misma semana, el mismo dia y con horas solapadas.
+      if (
+        (first.weekStart ?? "") !== (second.weekStart ?? "") ||
+        first.day !== second.day ||
+        !rangesOverlap(first.startTime, first.endTime, second.startTime, second.endTime)
+      ) {
         continue;
       }
 

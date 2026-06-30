@@ -44,14 +44,16 @@ interface Demand {
  *   las sesiones entre dias distintos y equilibrar la carga por dia.
  * - No modifica las sesiones existentes (las fijas y las demas son obstaculos).
  */
-export function generateSchedule(data: AppData): GenerationResult {
+export function generateSchedule(data: AppData, weekStart: string): GenerationResult {
   const { config } = data;
   const block = config.blockMinutes;
   const visibleDays = DAYS.filter((day) => config.daysVisible.includes(day.id)).map((day) => day.id);
   const activeVenues = data.venues.filter((venue) => venue.active);
 
+  // Solo cuentan como ocupacion las sesiones de la semana en la que generamos.
   const occupied: Occupied[] = [];
   for (const session of data.sessions) {
+    if ((session.weekStart ?? "") !== weekStart) continue;
     if (session.day && session.venueId && session.startTime && session.endTime) {
       const start = timeToMinutes(session.startTime);
       const end = timeToMinutes(session.endTime);
@@ -146,6 +148,7 @@ export function generateSchedule(data: AppData): GenerationResult {
         type: "entrenamiento",
         notes: "",
         status: "colocada",
+        weekStart,
       });
     } else {
       unplacedByTeam.set(demand.teamId, (unplacedByTeam.get(demand.teamId) ?? 0) + 1);

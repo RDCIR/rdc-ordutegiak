@@ -93,6 +93,8 @@ export interface TrainingSession {
   color?: string;
   /** Sesion fija: el generador no la mueve ni la elimina. */
   locked?: boolean;
+  /** Semana a la que pertenece la sesion (lunes ISO "YYYY-MM-DD"). */
+  weekStart?: string;
 }
 
 export interface WeekConfig {
@@ -105,6 +107,8 @@ export interface WeekConfig {
   language: Language;
   colorCriterion: ColorCriterion;
   theme: "light" | "dark";
+  /** Semana actualmente en pantalla (lunes ISO "YYYY-MM-DD"). */
+  currentWeekStart?: string;
 }
 
 export interface AppData {

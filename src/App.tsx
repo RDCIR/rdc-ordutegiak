@@ -13,11 +13,13 @@ import { SessionEditorModal } from "./components/SessionEditorModal";
 import { TopBar } from "./components/TopBar";
 import { PlannerGrid } from "./components/PlannerGrid";
 import { PrintView } from "./components/PrintView";
+import { WeekBar } from "./components/WeekBar";
 import { createSampleData } from "./data/sampleData";
 import { matchesFilters } from "./lib/filtering";
 import { makeId } from "./lib/ids";
-import { loadStoredData, normalizeImportedData, saveStoredData } from "./lib/storage";
+import { ensureWeeks, loadStoredData, normalizeImportedData, saveStoredData } from "./lib/storage";
 import { generateSchedule, GenerationResult } from "./lib/generator";
+import { addWeeksISO, mondayOfISO, todayISO } from "./lib/dates";
 import { addMinutes, durationMinutes } from "./lib/time";
 import { applyDerivedSessionStatuses, summarizeReport, validateSessions } from "./lib/validation";
 import { issueMessage, LanguageContext, translate } from "./lib/i18n";
@@ -57,6 +59,7 @@ export function App() {
   const canUndo = history.past.length > 0;
   const lang = data.config.language;
   const t = (key: string) => translate(lang, key);
+  const currentWeekStart = data.config.currentWeekStart ?? mondayOfISO(todayISO());
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [creatingSession, setCreatingSession] = useState(false);
@@ -71,14 +74,18 @@ export function App() {
     }),
   );
 
+  const weekSessions = useMemo(
+    () => data.sessions.filter((session) => (session.weekStart ?? "") === currentWeekStart),
+    [data.sessions, currentWeekStart],
+  );
   const report = useMemo(
-    () => validateSessions(data.sessions, data.config, data.venues, data.coaches, data.teams),
-    [data.config, data.sessions, data.venues, data.coaches, data.teams],
+    () => validateSessions(weekSessions, data.config, data.venues, data.coaches, data.teams),
+    [data.config, weekSessions, data.venues, data.coaches, data.teams],
   );
   const issueSummary = useMemo(() => summarizeReport(report), [report]);
   const filteredSessions = useMemo(
-    () => data.sessions.filter((session) => matchesFilters(session, filters)),
-    [data.sessions, filters],
+    () => weekSessions.filter((session) => matchesFilters(session, filters)),
+    [weekSessions, filters],
   );
 
   useEffect(() => {
@@ -125,7 +132,21 @@ export function App() {
     }));
   };
 
-  const handleSaveSession = (session: TrainingSession) => {
+  // Navegar de semana es estado de vista: actualiza la config sin tocar el historial de deshacer.
+  const goToWeek = (weekStart: string) => {
+    setHistory((current) => ({
+      ...current,
+      present: { ...current.present, config: { ...current.present.config, currentWeekStart: weekStart } },
+    }));
+    setGeneration(null);
+  };
+  const handlePrevWeek = () => goToWeek(addWeeksISO(currentWeekStart, -1));
+  const handleNextWeek = () => goToWeek(addWeeksISO(currentWeekStart, 1));
+  const handleToday = () => goToWeek(mondayOfISO(todayISO()));
+
+  const handleSaveSession = (incoming: TrainingSession) => {
+    // Una sesion nueva pertenece a la semana que se esta viendo.
+    const session: TrainingSession = { ...incoming, weekStart: incoming.weekStart ?? currentWeekStart };
     updateData((current) => {
       const exists = current.sessions.some((entry) => entry.id === session.id);
       return {
@@ -284,38 +305,30 @@ export function App() {
     if (!window.confirm(t("confirm.reset"))) {
       return;
     }
-    const sample = createSampleData();
+    const sample = ensureWeeks(createSampleData());
     // Mantener el idioma elegido aunque se restauren los datos de prueba.
     updateData((current) => ({ ...sample, config: { ...sample.config, language: current.config.language } }));
     setFilters(initialFilters);
     setToast({ key: "toast.sampleRestored", undo: true });
   };
 
+  // Copia las sesiones de la semana actual a la semana siguiente y navega a ella.
   const handleDuplicateWeek = () => {
-    updateData((current) => ({
-      ...current,
-      sessions: [
-        ...current.sessions,
-        ...current.sessions
-          .filter((session) => session.status !== "pendiente")
-          .map((session) => ({
-            ...session,
-            id: makeId("session"),
-            venueId: null,
-            day: null,
-            startTime: null,
-            endTime: null,
-            durationMinutes: durationMinutes(session.startTime, session.endTime),
-            status: "pendiente" as const,
-            notes: session.notes ? `Copia semana. ${session.notes}` : "Copia semana.",
-          })),
-      ],
-    }));
+    const target = addWeeksISO(currentWeekStart, 1);
+    const copies = data.sessions
+      .filter((session) => (session.weekStart ?? "") === currentWeekStart)
+      .map((session) => ({ ...session, id: makeId("session"), weekStart: target }));
+    if (copies.length === 0) {
+      setToast({ key: "toast.weekEmpty" });
+      return;
+    }
+    updateData((current) => ({ ...current, sessions: [...current.sessions, ...copies] }));
+    goToWeek(target);
     setToast({ key: "toast.weekDuplicated", undo: true });
   };
 
   const handleGenerate = () => {
-    const result = generateSchedule(data);
+    const result = generateSchedule(data, currentWeekStart);
     if (result.created === 0 && result.unplaced.length === 0) {
       setGeneration(null);
       setToast({ key: "gen.nothing" });
@@ -340,6 +353,7 @@ export function App() {
       <div className="app-shell">
         <ResourcePanel
           data={data}
+          sessions={weekSessions}
           report={report}
           onEditResource={(kind, id) => setResourceModal({ kind, id })}
           onDeleteResource={handleDeleteResource}
@@ -365,6 +379,14 @@ export function App() {
             onImport={handleImport}
             onReset={handleReset}
             onDuplicateWeek={handleDuplicateWeek}
+          />
+
+          <WeekBar
+            weekStart={currentWeekStart}
+            language={lang}
+            onPrev={handlePrevWeek}
+            onNext={handleNextWeek}
+            onToday={handleToday}
           />
 
           {generation && generation.unplaced.length > 0 && (
@@ -401,10 +423,11 @@ export function App() {
             sessions={filteredSessions}
             filters={filters}
             report={report}
+            weekStart={currentWeekStart}
             onEditSession={(sessionId) => setEditingSessionId(sessionId)}
           />
 
-          <PrintView data={data} sessions={filteredSessions} filters={filters} />
+          <PrintView data={data} sessions={filteredSessions} filters={filters} weekStart={currentWeekStart} />
         </div>
 
         {(creatingSession || editingSession) && (

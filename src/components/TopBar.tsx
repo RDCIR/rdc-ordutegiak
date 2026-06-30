@@ -136,7 +136,7 @@ export function TopBar({
           <Undo2 size={15} />
           {t("btn.undo")}
         </button>
-        <button type="button" className="toolbar-button" onClick={onDuplicateWeek}>
+        <button type="button" className="toolbar-button" onClick={onDuplicateWeek} title={t("btn.duplicateWeekTitle")}>
           <Copy size={15} />
           {t("btn.duplicateWeek")}
         </button>

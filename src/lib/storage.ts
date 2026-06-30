@@ -1,4 +1,5 @@
 import { createSampleData } from "../data/sampleData";
+import { mondayOfISO, todayISO } from "./dates";
 import {
   AppData,
   Coach,
@@ -151,6 +152,22 @@ function sanitizeSession(value: unknown): TrainingSession | null {
     status,
     color: asOptionalString(value.color),
     locked: value.locked === true || undefined,
+    weekStart: asOptionalString(value.weekStart),
+  };
+}
+
+/**
+ * Garantiza fechas reales: fija la semana actual en la config (si falta) y
+ * asigna esa semana a las sesiones que aun no tienen una (datos antiguos).
+ */
+export function ensureWeeks(data: AppData): AppData {
+  const currentWeekStart = data.config.currentWeekStart ?? mondayOfISO(todayISO());
+  return {
+    ...data,
+    config: { ...data.config, currentWeekStart },
+    sessions: data.sessions.map((session) =>
+      session.weekStart ? session : { ...session, weekStart: currentWeekStart },
+    ),
   };
 }
 
@@ -163,33 +180,33 @@ function sanitizeList<T>(value: unknown, sanitize: (entry: unknown) => T | null,
 export function normalizeImportedData(value: unknown): AppData {
   const fallback = createSampleData();
   if (!isRecord(value)) {
-    return fallback;
+    return ensureWeeks(fallback);
   }
 
-  return {
+  return ensureWeeks({
     schemaVersion: 1,
     config: { ...fallback.config, ...(isRecord(value.config) ? value.config : {}) },
     teams: sanitizeList(value.teams, sanitizeTeam, fallback.teams),
     coaches: sanitizeList(value.coaches, sanitizeCoach, fallback.coaches),
     venues: sanitizeList(value.venues, sanitizeVenue, fallback.venues),
     sessions: sanitizeList(value.sessions, sanitizeSession, fallback.sessions),
-  };
+  });
 }
 
 export function loadStoredData(): AppData {
   if (typeof localStorage === "undefined") {
-    return createSampleData();
+    return ensureWeeks(createSampleData());
   }
 
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
-    return createSampleData();
+    return ensureWeeks(createSampleData());
   }
 
   try {
     return normalizeImportedData(JSON.parse(stored));
   } catch {
-    return createSampleData();
+    return ensureWeeks(createSampleData());
   }
 }
 
